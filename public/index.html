@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!--script src="//cdn.jsdelivr.net/npm/phaser@3.12.0/dist/phaser.min.js"></script> -->
+    <title>Slither IO</title>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type="text/javascript" src="js/score.min.js?rotate=1"></script>
+
+    <script src="js/phaser.min.js"></script>
+    <script src="socket.io/socket.io.js"></script>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui">
+
+
+    <!-- Allow fullscreen mode on iOS devices. (These are Apple specific meta tags.) -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <link rel="apple-touch-icon" sizes="128x128" href="icon-128x128.png" />
+    <meta name="HandheldFriendly" content="true" />
+    <!-- Chrome for Android web app tags -->
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <link rel="manifest" href="manifest.json" />
+
+
+    <meta property="og:title" content="Emoji Snakes" />
+    <meta property="og:type" content="website" />
+
+    <meta property="og:site_name" content="Emoji Snakes" />
+    <meta property="og:description" content="Now play the snakes slithering game in emoji style with Emoji Snakes, a game developed by Beedo Games. You can pick the various stylish emoji snakes. There is only rule to play this game, don't run into the other snakes and eat others to grow longer. Good Luck."
+    />
+
+
+    <script type="text/javascript" src="js/compressed.js"></script>
+    <script type="text/javascript" src="js/game.js"></script>
+
+
+
+    <link rel="shortcut icon" sizes="128x128" href="icon-128x128.png" />
+
+
+    <style type="text/css">
+        @font-face {
+            font-family: gamefont_regular;
+            src: url(fonts/UbuntuTitling-Bold.ttf);
+        }
+
+        @font-face {
+            font-family: gamefont_bold;
+            src: url(fonts/Roboto-Bold.ttf);
+        }
+
+        * {
+            font-family: gamefont_regular !important;
+        }
+
+        body {
+            margin: 0px;
+        }
+
+        canvas {
+            display: block;
+            margin: 0;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <!-- <script src="https://connect.facebook.net/en_US/fbinstant.6.2.js"></script> -->
+    <script src="js/fbintgames.js"></script>
+    <script type="text/javascript">
+        function _encode(data) {
+            return JSON.stringify(data);
+        }
+        function _decode(data) {
+            return JSON.parse(data);
+        }
+        var adInitialized = false;
+        var isGameLoaded = false;
+        var socket = io();
+        function updateGame(data) {
+            
+        }
+        function onData(data) {
+            let data = _encode(data);
+            if(data.update){
+                updateGame(data.update);
+            }
+        }
+        socket.on('msg', function(data) {
+            if(!!data){
+
+            }
+        });
+
+        setTimeout(function() {
+            document.getElementById("logo").style.animation = "fade 1s";
+            setTimeout(function() {
+                document.getElementById("splash").style.display = "none";
+            }, 1000);
+
+        }, 3500);
+
+        if (platform == PLATFORMS.GD) {
+            var isGameLoaded = false;
+            window["GD_OPTIONS"] = {
+                "gameId": "da33a0677469442880edcda3616529ff",
+                "advertisementSettings": {
+                    "autoplay": false,
+                },
+                "onEvent": function(event) {
+                    switch (event.name) {
+                        case "SDK_GAME_START":
+                            console.log("Game Resumed");
+                            if (isGameLoaded && gameScreen == 100) {
+                                MenuScene.Show_ConnectionScreen();
+                            }
+                            break;
+                        case "SDK_GAME_PAUSE":
+                            console.log("Game Paused");
+                            if (isGameLoaded) {
+
+                            }
+                            break;
+                        case "SDK_READY":
+                            console.log("GD SDK Ready");
+                            adInitialized = true;
+                            break;
+                        case "SDK_ERROR":
+                            break;
+                    }
+                },
+            };
+            (function(d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0];
+                if (d.getElementById(id)) return;
+                js = d.createElement(s);
+                js.id = id;
+                js.src = 'main.min.js';
+                fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'gamedistribution-jssdk'));
+        }
+
+
+
+
+
+        function OnGameLoaded() {
+            isGameLoaded = true;
+            updateFBAssetsLoaded();
+        }
+
+        function ShowAds() {
+            console.log("<Game Distribution> Show Ads Called");
+            //window["gdsdk"]["showBanner"]();
+        }
+
+        var namesPool;
+        var maxNames;
+        fetch('mix/names.txt')
+            .then(response => response.text())
+            .then(text => OnNamesFetched(text));
+
+        function OnNamesFetched(data) {
+            namesPool = data.split("\n");
+            maxNames = namesPool.length;
+        }
+
+        function onPageReady() {
+            game = new Phaser.Game(Config);
+            var pathURL = window.location.origin + window.location.pathname;
+            game.baseURL = pathURL.substring(0, pathURL.lastIndexOf('/')) + "/";
+            GetLocalProfile();
+            setMobileParams();
+        }
+
+        function onNameChanged(input) {
+            myName = input.value;
+            sessionStorage.setItem(PREFIX + "name", myName);
+        }
+
+        function onGameStarted() {
+            switch (platform) {
+                case PLATFORMS.WEB:
+                    document.getElementById('header').style.display = "none";
+                    break;
+
+                case PLATFORMS.GD:
+                    document.getElementById('header').style.display = "none";
+                    break;
+
+                case PLATFORMS.FACEBOOK:
+                    if (isFBInstSDKReady) {
+                        if (entryData != null && entryData != "") {
+                            document.getElementById('welcome').innerHTML = 'Beat ' + entryData['name'];
+                            document.getElementById('name').innerHTML = 'Length ' + entryData['score'];
+                            document.getElementById('pic').src = entryData['pic_url'];
+                        } else {
+                            document.getElementById('header').style.display = "none";
+                        }
+                    }
+                    break;
+            }
+        }
+
+        function onGameOver() {
+            if (isFBInstSDKReady) {
+                document.getElementById("name").style.textDecoration = "none";
+                document.getElementById('header').style.display = "block";
+                document.getElementById('name').innerHTML = fbData.profile.name;
+                document.getElementById("pic").src = fbData.profile.pic;
+                document.getElementById('welcome').innerHTML = 'Welcome';
+            }
+        }
+    </script>
+
+
+
+</head>
+
+<body onload="onPageReady();onFBStart();">
+    <div id="gameContainer">
+
+    </div>
+    <div id="header" style="display: none;">
+        <div class="line"></div>
+        <div class="content">
+            <img class="frame" src="images/ui/header.png" style="" />
+            <img id="pic" class="pic" src="" style="" />
+            <h3 id="welcome" class="welcome">Welcome</h3>
+            <h3 id="name" class="name">Waqas Siddique</h3>
+        </div>
+
+
+
+    </div>
+    <input id="yourname" type="text" name="name" autocomplete="off" onkeyup="onNameChanged(this)" placeholder="nick name...." style="display: none;">
+
+    <div id="splash" style="display: none;">
+        <img class="logo" id="logo" src="beedo-games.png">
+
+    </div>
+    <div id="leaderboard_frame" style="display: none;">
+        <div class="leaderboard">
+            <div class="leaderboard__header">
+                <div class="b_logo"><img src="images/ui/lb_icon.png" width="40" alt=""></div>
+                <div class="b_caption">
+                    <p>LEADERBOARD</p>
+
+                </div>
+                <img src="images/ui/close_button.png" class="close_button" height="28px" onclick="closeFBLeaderboard();">
+            </div>
+
+            <div id="leaderboard_content" class="leaderboard__content">
+                <ul>
+                    <li>
+                        <div class="graphic"><img src="" alt=""></div>
+                        <div class="name"><span class="header">Jeff Bezoz</span><span class="stat">47.5</span><span class="sub">units</span></div>
+                    </li>
+                    <li>
+                        <div class="graphic"><img src="" alt=""></div>
+                        <div class="name"><span class="header">Barack Obama</span><span class="stat">43.5</span><span class="sub">B</span></div>
+                    </li>
+                    <li>
+                        <div class="graphic"><img src="" alt=""></div>
+                        <div class="name"><span class="header">Bill Gates</span><span class="stat">40.5</span><span class="sub">B</span></div>
+                    </li>
+                    <li>
+                        <div class="graphic"><img src="" alt=""></div>
+                        <div class="name"><span class="header">Sundar Pichai</span><span class="stat">38.2</span><span class="sub">B</span></div>
+                    </li>
+                    <li>
+                        <div class="graphic"><img src="" alt=""></div>
+                        <div class="name"><span class="header">Mark Zukerberg</span><span class="stat">37.5</span><span class="sub">B</span></div>
+                    </li>
+                    <li>
+                        <div class="graphic"><img src="" alt=""></div>
+                        <div class="name"><span class="header">Mark Zukerberg</span><span class="stat">37.5</span><span class="sub">B</span></div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
